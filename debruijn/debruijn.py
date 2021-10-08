@@ -165,12 +165,55 @@ def remove_paths(graph, path_list, delete_entry_node, delete_sink_node):
 
 
 def std(data):
-    pass
+    """
+    Standard deviation
+
+    Parameters : 
+        data : List of values
+    Returns : 
+        Return the standard deviation
+    """
+    return statistics.stdev(data)
+
 
 
 def select_best_path(graph, path_list, path_length, weight_avg_list, 
                      delete_entry_node=False, delete_sink_node=False):
-    pass
+    """
+    Select the best and remove the other path
+
+    Parameters : 
+        graph : the fraph we want to simplify
+        path_list : list of path to check
+        path_length : lenth of path
+        weight_avg_list : list of the average weight of the path (in the same order of the list path)
+        delete_entry_node : boolean to know if starting node is removed
+        delete_sink_node : boolean to know if ending node is removed
+    Returns : 
+        Return the best path : the bigger
+    """
+    random.seed(9001) 
+    remove_path = path_list
+    index_max = 0
+    
+    # Best frequency on average
+    if std(weight_avg_list) != 0:
+        max_value = max(weight_avg_list)
+        index_max = weight_avg_list.index(max_value)
+    # Best frequency on length
+    elif std(path_length) != 0:
+        max_value = max(path_length)
+        index_max = path_length.index(max_value)
+    #random
+    else:
+        index_max = random.randint(0, len(path_list))
+    
+    remove_path.pop(index_max)
+
+    return remove_paths(graph, remove_path, delete_entry_node, delete_sink_node)
+       
+ 
+
 
 def path_average_weight(graph, path):
     """
@@ -251,10 +294,11 @@ def get_contigs(graph, starting_nodes, ending_nodes):
     contigs=[]
     for start_node in starting_nodes:
         for end_node in ending_nodes:
+
             if(nx.has_path(graph, start_node, end_node)):
+                constructed_contig = ""
                 for path in nx.all_simple_paths(graph, start_node, end_node):
 
-                    constructed_contig = path[0]
                     for index, word in enumerate(path):
                         if index == 0 :
                             constructed_contig = word
@@ -341,17 +385,10 @@ def main():
 
 
 def main_test():
-    graph_1 = nx.DiGraph()
-#    graph_2 = nx.DiGraph()
-#    graph_3 = nx.DiGraph()
-#    graph_4 = nx.DiGraph()
-#    graph_1.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
-    graph_1.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
-#    graph_3.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
-#    graph_4.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
-#    graph_1 = remove_paths(graph_1, [(1,2)], True, False)
-#    graph_2 = remove_paths(graph_2, [(5,7)], False, True)
-    graph_1 = remove_paths(graph_1, [(2,4,5)], False, False)
-#    graph_4 = remove_paths(graph_4, [(2,4,5)], True, True)
+    graph_3 = nx.DiGraph()
+    graph_3.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (2, 8), (8, 9),
+                            (9, 5), (5, 6), (5, 7)])
+    graph_3 = select_best_path(graph_3, [[2, 4, 5], [2, 8, 9, 5]],
+                                         [1, 4], [13, 10])
 
 main_test()
