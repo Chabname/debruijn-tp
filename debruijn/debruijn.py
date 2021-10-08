@@ -68,15 +68,33 @@ def get_arguments():
 
 
 def read_fastq(fastq_file):
-    pass
+    """Reading fastq file and create sequence generator"""
+    path = isfile(fastq_file)
+    with open(path, "r") as file:
+        for line in file:
+            yield next(file).strip()
+            next(file)
+            next(file)
+
 
 
 def cut_kmer(read, kmer_size):
-    pass
+    """Getting kmer for a sequence"""
+    for i in range(len(read)-kmer_size+1):
+        yield read[i:i+kmer_size]
 
 
-def build_kmer_dict(fastq_file, kmer_size):
-    pass
+def build_kmer_dict(fastq_file, kmer_size):   
+    """Building the dictionnary with number of occurences""" 
+    dictionnary = {}
+    for read in (read_fastq(fastq_file)):
+        for kmer in (cut_kmer(read, kmer_size)):
+            if kmer in dictionnary.keys():
+                dictionnary[kmer] += 1
+            else:
+                dictionnary[kmer] = 1
+    return dictionnary
+
 
 
 def build_graph(kmer_dict):
