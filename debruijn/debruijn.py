@@ -68,7 +68,14 @@ def get_arguments():
 
 
 def read_fastq(fastq_file):
-    """Reading fastq file and create sequence generator"""
+    """
+    Reading fastq file and create sequence generator
+    
+    Parameters : 
+        fastq_file : fasta file to read 
+    Returns : 
+        sequence (yield is the output)
+    """
     path = isfile(fastq_file)
     with open(path, "r") as file:
         for line in file:
@@ -79,13 +86,29 @@ def read_fastq(fastq_file):
 
 
 def cut_kmer(read, kmer_size):
-    """Getting kmer for a sequence"""
+    """
+    Getting kmer for a sequence
+    
+    Parameters : 
+        read : a sequence (read) we want to cut 
+        kmer_size : size of the kmer (length of cut)
+    Returns : 
+        dictionnary : a dictionnary of kmer with their occurences
+    """
     for i in range(len(read)-kmer_size+1):
         yield read[i:i+kmer_size]
 
 
 def build_kmer_dict(fastq_file, kmer_size):   
-    """Building the dictionnary with number of occurences""" 
+    """
+    Building the dictionnary with number of occurences
+    
+    Parameters : 
+        fastq_file : fasta file 
+        kmer_size : size of the kmer
+    Returns : 
+        dictionnary : a dictionnary of kmer with their occurences
+    """ 
     dictionnary = {}
     for read in (read_fastq(fastq_file)):
         for kmer in (cut_kmer(read, kmer_size)):
@@ -98,13 +121,25 @@ def build_kmer_dict(fastq_file, kmer_size):
 
 
 def build_graph(kmer_dict):
-    """Building a weighted directed edge""" 
+    """
+    Building a weighted directed edge graph
+    
+    Parameters : 
+        kmer_dict : dictionnary of kmer with their occurences
+    Returns : 
+        diGraph : a weighted directed edge graph
+    """ 
     diGraph = nx.DiGraph()
     #diGraph.add_weighted_edges_from(kmer_dict)
     
     for key_dic, dic_weight in kmer_dict.items():
+        # key_dic[:-1] : get the kmer without the last amino acid
+        # key_dic[1:] : get the kmer without the first amino acid
+        print(key_dic[1:])
         diGraph.add_edge(key_dic[:-1], key_dic[1:], weight = dic_weight)
     return diGraph
+
+
 
 def remove_paths(graph, path_list, delete_entry_node, delete_sink_node):
     pass
@@ -118,7 +153,16 @@ def select_best_path(graph, path_list, path_length, weight_avg_list,
     pass
 
 def path_average_weight(graph, path):
-    pass
+    """
+    Get the average weight of a path
+
+    Parameters : 
+        graph : tree of prefixes and suffixes kmers
+    Returns : 
+        A list of starting nodes
+    """
+
+
 
 def solve_bubble(graph, ancestor_node, descendant_node):
     pass
@@ -133,16 +177,85 @@ def solve_out_tips(graph, ending_nodes):
     pass
 
 def get_starting_nodes(graph):
-    pass
+    """
+    Find all nodes which don't have predessors
+
+    Parameters : 
+        graph : tree of prefixes and suffixes kmers
+    Returns : 
+        A list of starting nodes
+    """
+    start_node = []
+    for node in graph:
+        predecessors = list(graph.predecessors(node))
+        if len(predecessors) == 0:
+            start_node.append(node)
+    return start_node
+
+
 
 def get_sink_nodes(graph):
-    pass
+    """
+    Fin all nodes which don't have successors
+
+    Parameters : 
+        graph : tree of prefixes and suffixes kmers
+    Returns : 
+        A list of final nodes
+    """
+    sink_node = []
+    for node in graph:
+        successsors = list(graph.successors(node))
+        if len(successsors) == 0:
+            sink_node.append(node)
+    return sink_node
+
+
 
 def get_contigs(graph, starting_nodes, ending_nodes):
-    pass
+    """
+    Get all the possible contiges with simple path
+
+    Parameters : 
+        graph :tree of prefixes and suffixes kmers
+    	starting_nodes: list of starting nodes
+    	ending_nodes: list of end nodes 
+    Returns : 
+        A list of tuples with contig and length of contig
+    """
+    contigs=[]
+    for start_node in starting_nodes:
+        for end_node in ending_nodes:
+            if(nx.has_path(graph, start_node, end_node)):
+                for path in nx.all_simple_paths(graph, start_node, end_node):
+
+                    constructed_contig = path[0]
+                    for index, word in enumerate(path):
+                        if index == 0 :
+                            constructed_contig = word
+                        else:
+                            constructed_contig += word[-1]
+                    contigs.append([constructed_contig, len(constructed_contig)])
+    return(contigs)
+
+
 
 def save_contigs(contigs_list, output_file):
-    pass
+    """
+    Save the finded contigs and write them into a file 
+
+    Parameters : 
+        contigs_list : List of all contigs with their length
+    	output_file: path of the output file
+    Returns : 
+        A list of tuples with contig and length of contig
+    """
+    with open(output_file, "w") as file:
+        for index, contig in enumerate(contigs_list):
+            file.write(">contig_" + str(index) + " len=" + str(contig[1]) + "\n")
+            file.write(fill(contig[0]) + "\n")
+    file.close
+
 
 
 def fill(text, width=80):
@@ -202,7 +315,13 @@ def main():
 
 
 def main_test():
-    dico = build_kmer_dict("data/eva71_two_reads.fq", 3)
-    build_graph(dico)
-
+    #dico = build_kmer_dict("data/eva71_hundred_reads.fq", 3)
+    #my_graph = build_graph(dico)
+    #starts = get_starting_nodes(my_graph)
+    #ends = get_sink_nodes(my_graph)
+    #get_contigs(my_graph, starts, ends)
+    graph = nx.DiGraph()
+    graph.add_edges_from([("TC", "CA"), ("AC", "CA"), ("CA", "AG"), ("AG", "GC"), ("GC", "CG"), ("CG", "GA"), ("GA", "AT"), ("GA", "AA")])
+    contig_list = get_contigs(graph, ["TC", "AC"], ["AT" , "AA"])
+    save_contigs(contig_list, "result.txt")
 main_test()
