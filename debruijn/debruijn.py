@@ -142,7 +142,27 @@ def build_graph(kmer_dict):
 
 
 def remove_paths(graph, path_list, delete_entry_node, delete_sink_node):
-    pass
+    """
+    Remove one or multiple path
+
+    Parameters : 
+        graph : tree 
+        path_list : the path to remove
+        delete_entry_node : boolean to know if starting node is removed
+        delete_sink_node : boolean to know if ending node is removed
+    Returns : 
+        Remove the path
+    """
+    for path in path_list:
+        if delete_entry_node:
+            graph.remove_node(path[0])
+        if delete_sink_node:
+            graph.remove_node(path[-1])
+
+        graph.remove_nodes_from(path[1:-1])
+    return graph
+
+
 
 def std(data):
     pass
@@ -157,11 +177,16 @@ def path_average_weight(graph, path):
     Get the average weight of a path
 
     Parameters : 
-        graph : tree of prefixes and suffixes kmers
+        graph : tree 
+        path : one possible path (contigs)
     Returns : 
-        A list of starting nodes
+        The average weight of a path
     """
-
+    list_weight = []
+    sub_graphes = graph.subgraph(path).edges(data=True)
+    for edge in sub_graphes:
+        list_weight.append(edge[2]["weight"])
+    return statistics.mean(list_weight)
 
 
 def solve_bubble(graph, ancestor_node, descendant_node):
@@ -236,7 +261,7 @@ def get_contigs(graph, starting_nodes, ending_nodes):
                         else:
                             constructed_contig += word[-1]
                     contigs.append([constructed_contig, len(constructed_contig)])
-    return(contigs)
+    return contigs
 
 
 
@@ -261,6 +286,7 @@ def save_contigs(contigs_list, output_file):
 def fill(text, width=80):
     """Split text with a line return to respect fasta format"""
     return os.linesep.join(text[i:i+width] for i in range(0, len(text), width))
+
 
 def draw_graph(graph, graphimg_file):
     """Draw the graph
@@ -315,13 +341,17 @@ def main():
 
 
 def main_test():
-    #dico = build_kmer_dict("data/eva71_hundred_reads.fq", 3)
-    #my_graph = build_graph(dico)
-    #starts = get_starting_nodes(my_graph)
-    #ends = get_sink_nodes(my_graph)
-    #get_contigs(my_graph, starts, ends)
-    graph = nx.DiGraph()
-    graph.add_edges_from([("TC", "CA"), ("AC", "CA"), ("CA", "AG"), ("AG", "GC"), ("GC", "CG"), ("CG", "GA"), ("GA", "AT"), ("GA", "AA")])
-    contig_list = get_contigs(graph, ["TC", "AC"], ["AT" , "AA"])
-    save_contigs(contig_list, "result.txt")
+    graph_1 = nx.DiGraph()
+#    graph_2 = nx.DiGraph()
+#    graph_3 = nx.DiGraph()
+#    graph_4 = nx.DiGraph()
+#    graph_1.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
+    graph_1.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
+#    graph_3.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
+#    graph_4.add_edges_from([(1, 2), (3, 2), (2, 4), (4, 5), (5, 6), (5, 7)])
+#    graph_1 = remove_paths(graph_1, [(1,2)], True, False)
+#    graph_2 = remove_paths(graph_2, [(5,7)], False, True)
+    graph_1 = remove_paths(graph_1, [(2,4,5)], False, False)
+#    graph_4 = remove_paths(graph_4, [(2,4,5)], True, True)
+
 main_test()
