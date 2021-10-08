@@ -98,8 +98,13 @@ def build_kmer_dict(fastq_file, kmer_size):
 
 
 def build_graph(kmer_dict):
-    pass
-
+    """Building a weighted directed edge""" 
+    diGraph = nx.DiGraph()
+    #diGraph.add_weighted_edges_from(kmer_dict)
+    
+    for key_dic, dic_weight in kmer_dict.items():
+        diGraph.add_edge(key_dic[:-1], key_dic[1:], weight = dic_weight)
+    return diGraph
 
 def remove_paths(graph, path_list, delete_entry_node, delete_sink_node):
     pass
@@ -192,5 +197,12 @@ def main():
     #     save_graph(graph, args.graph_file)
 
 
-if __name__ == '__main__':
-    main()
+#if __name__ == '__main__':
+#    main()
+
+
+def main_test():
+    dico = build_kmer_dict("data/eva71_two_reads.fq", 3)
+    build_graph(dico)
+
+main_test()

@@ -1,0 +1,4 @@
+.coverage
+tests/__pycache__
+debruijn/__pycache__
+debruijn/.coverage
