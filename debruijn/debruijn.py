@@ -134,7 +134,6 @@ def build_graph(kmer_dict):
     for key_dic, dic_weight in kmer_dict.items():
         # key_dic[:-1] : get the kmer without the last amino acid
         # key_dic[1:] : get the kmer without the first amino acid
-        print(key_dic[1:])
         digraph.add_edge(key_dic[:-1], key_dic[1:], weight = dic_weight)
     return digraph
 
@@ -301,13 +300,14 @@ def solve_entry_tips(graph, starting_nodes):
     #Then we check if we have nodes with multiple predessors
     if len(path_list) != 0:
         path_length = []
-        weight_avg_list = []
+        weight_avg = []
         for path in path_list:
             path_length.append(len(path))
-            weight_avg_list.append(path_average_weight(graph, path))
+            weight_avg.append(path_average_weight(graph, path))
+        #we have to remove the first node and all betWeen but not the last node
+        graph = select_best_path(graph, path_list, path_length, weight_avg, delete_entry_node=True)
 
-    #we have to remove the first node and all betWeen but not the last node
-    return select_best_path(graph, path_list, path_length, weight_avg_list, delete_entry_node=True)
+    return graph
 
 
 def solve_out_tips(graph, ending_nodes):
@@ -333,13 +333,14 @@ def solve_out_tips(graph, ending_nodes):
     #Then we check if we have nodes with multiple predessors
     if len(path_list) != 0:
         path_length = []
-        weight_avg_list = []
+        weight_avg = []
         for path in path_list:
             path_length.append(len(path))
-            weight_avg_list.append(path_average_weight(graph, path))
+            weight_avg.append(path_average_weight(graph, path))
+        #we have to remove the last node and all betWeen but not the first node
+        graph = select_best_path(graph, path_list, path_length, weight_avg, delete_sink_node=True)
 
-    #we have to remove the last node and all betWeen but not the first node
-    return select_best_path(graph, path_list, path_length, weight_avg_list, delete_sink_node=True)
+    return graph
 
 
 def get_starting_nodes(graph):
@@ -469,7 +470,7 @@ def main():
     graph = solve_entry_tips(graph, sart_nodes)
     graph = solve_out_tips(graph, end_nodes)
     contigs = get_contigs(graph, sart_nodes, end_nodes)
-    save_contigs(contigs, "data/results.txt")
+    save_contigs(contigs, "data/contig")
 
     # Fonctions de dessin du graphe
     # A decommenter si vous souhaitez visualiser un petit
