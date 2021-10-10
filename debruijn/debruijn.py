@@ -15,7 +15,7 @@
 
 import argparse
 import os
-#import sys
+import sys
 #import matplotlib
 #from operator import itemgetter
 import random
@@ -42,9 +42,9 @@ def isfile(path):
     """
     if not os.path.isfile(path):
         if os.path.isdir(path):
-            msg = "{path} is a directory"
+            msg = ("{p} is a directory").format(p=path)
         else:
-            msg = "{path} does not exist."
+            msg = ("{p} does not exist.").format(p=path)
         raise argparse.ArgumentTypeError(msg)
     return path
 
@@ -55,7 +55,7 @@ def get_arguments():
     """
     # Parsing arguments
     parser = argparse.ArgumentParser(description=__doc__, usage=
-                                     "{sys.argv[0]} -h")
+                                     ("{s} -h").format(s=sys.argv[0]))
     parser.add_argument('-i', dest='fastq_file', type=isfile,
                         required=True, help="Fastq file")
     parser.add_argument('-k', dest='kmer_size', type=int,
