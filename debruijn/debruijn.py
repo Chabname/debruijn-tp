@@ -26,9 +26,9 @@ import networkx as nx
 random.seed(9001)
 
 
-__author__ = "Chabname GHASSEMI"
+__author__ = "Chabname GHASSEMI / Fatima SHOKOR"
 __copyright__ = "Universite Paris Diderot"
-__credits__ = ["Chabname GHASSEMI"]
+__credits__ = ["Chabname GHASSEMI / Fatima SHOKOR"]
 __license__ = "GPL"
 __version__ = "1.0.0"
 __maintainer__ = "Chabname GHASSEMI"
